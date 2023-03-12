@@ -2,15 +2,24 @@ package studentManager.model;
 
 import java.sql.Date;
 
-public class Student {
+public class StudentDTO {
 	private int sno;
 	private String name;
 	private Date birth;
 	private String gender;
 	private String phoneNumber;
 	private String email;
-	private int teamNumber;
 	private int seatNumber;
+	
+	public StudentDTO() {}
+	
+	public StudentDTO(String name, Date birth, String gender, String phoneNumber, String email) {
+		this.name = name;
+		this.birth = birth;
+		this.gender = gender;
+		this.phoneNumber = phoneNumber;
+		this.email = email;
+	}
 	
 	public int getSno() {
 		return sno;
@@ -47,12 +56,6 @@ public class Student {
 	}
 	public void setEmail(String email) {
 		this.email = email;
-	}
-	public int getTeamNumber() {
-		return teamNumber;
-	}
-	public void setTeamNumber(int teamNumber) {
-		this.teamNumber = teamNumber;
 	}
 	public int getSeatNumber() {
 		return seatNumber;

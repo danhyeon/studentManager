@@ -14,7 +14,7 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import studentManager.controller.UserDB;
+import studentManager.model.UserDAO;
  
 public class LoginView extends JFrame{
 	private static final long serialVersionUID = 1L;
@@ -87,7 +87,7 @@ public class LoginView extends JFrame{
    
     public void isLoginCheck(){
     	try {
-	    	new UserDB().selectUser().forEach(user->{
+	    	new UserDAO().selectUser().forEach(user->{
 	    		if(userText.getText().equals(user.getName()) && new String(passText.getPassword()).equals(user.getPassword())){
 	                bLoginCheck = true;
 	                if(isLogin()) main.showMainFrame();
