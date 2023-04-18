@@ -1,7 +1,7 @@
 package studentManager.view;
 
 import java.awt.EventQueue;
-import studentManager.controller.MainViewController;
+import src.studentManager.controller.MainViewController;
 
 public class MainProcess {
 	LoginView loginView;
