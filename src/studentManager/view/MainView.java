@@ -244,6 +244,9 @@ public class MainView extends JFrame {
 		attendCheck1();
 		btnNewButton_3.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				btnNewButton.doClick();
+				btnNewButton_1.doClick();
+				btnNewButton_2.doClick();
 				TextPopupForm pop = new TextPopupForm(470, 500);
 				ScrollPane scroll = new ScrollPane();
 				attendCheck2();

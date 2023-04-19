@@ -16,7 +16,7 @@ public class StudentDB {
 	private ArrayList<Student> students = new ArrayList<Student>();
 	
 	public StudentDB() {
-		String url = "jdbc:mysql://192.168.111.40:3306/StudentManager";
+		String url = "jdbc:mysql://localhost:3306/StudentManager";
 		String user = "studentManager";
 		String password = "dksxl124";
 		try {
