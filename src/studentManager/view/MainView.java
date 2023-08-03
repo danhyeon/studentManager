@@ -88,7 +88,7 @@ public class MainView extends JFrame {
 	
 	public MainView() {
 		setTitle("학생관리 프로그램");
-		setBounds(100, 20, (int)w-200, (int)h-100);
+		setBounds(100, 20, (int)w-200, (int)h);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
 		topPanel = new JPanel();

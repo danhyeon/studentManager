@@ -29,3 +29,4 @@ public class MainProcess {
 		con = new MainViewController(mainView);
 	}
 }
+
