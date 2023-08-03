@@ -2,11 +2,9 @@ package studentManager.view;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.ScrollPane;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -30,10 +28,10 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.border.LineBorder;
 
+import studentManager.controller.StudentDB;
 import studentManager.model.AttendCheck;
 import studentManager.model.SeatBTNLayout;
-import studentManager.model.StudentDAO;
-import studentManager.model.StudentDTO;
+import studentManager.model.Student;
 
 public class MainView extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -41,183 +39,293 @@ public class MainView extends JFrame {
 	InfoView infoView;
 	MainView mainView;
 	
-	final double w = Toolkit.getDefaultToolkit().getScreenSize().getWidth();
-	final double h = Toolkit.getDefaultToolkit().getScreenSize().getHeight();
-	
-	public ArrayList<AttendCheck> absentList = new ArrayList<AttendCheck>();
-	public ArrayList<AttendCheck> tardyList = new ArrayList<AttendCheck>();
-	public ArrayList<AttendCheck> etcList = new ArrayList<AttendCheck>();
-	public ArrayList<AttendCheck> tempList = new ArrayList<AttendCheck>();
-	public StringBuilder attendsb = new StringBuilder();
-	public StringBuilder absentsb = new StringBuilder();
-	public StringBuilder tardysb = new StringBuilder();
-	public StringBuilder etcsb = new StringBuilder();
-	public ArrayList<JCheckBox> checkBoxList = new ArrayList<JCheckBox>();
-	public ArrayList<SeatBTNLayout> layoutList = new ArrayList<SeatBTNLayout>();
-	public ArrayList<JPanel> layoutPanelList = new ArrayList<JPanel>();
-	public LineBorder lb = new LineBorder(Color.black, 1, true);
-	
-	public JPanel topPanel;
-	public JLabel topLabel;
-	public JPanel sidePanel;
-	public JPanel sidePanel_1;
-	public JPanel sidePanel_2;
-	public JButton student_insert_Button;
-	public JButton student_update_Button;
-	public JButton student_delete_Button;
-	public JButton absentBTN;
-	public JButton tardyBTN;
-	public JButton etcBTN;
-	public JButton reportBTN;
-	public JTabbedPane tabbedPane;
-	public JInternalFrame internalFrame;
-	public JPanel seatPannel1;
-	public JPanel seatPannel1_1;
-	public JPanel seatPannel1_2;
-	public JPanel seatPannel1_3;
-	public JPanel seatPannel1_4;
-	public JPanel seatPannel1_5;
-	public JPanel seatPannel1_6;
-	public JPanel seatPannel1_7;
-	public JPanel seatPannel1_8;
-	public JPanel panel_4;
-	
 	public void setMainView(MainView mainView) {
 		this.mainView = mainView;
 	}
 	
+	private ArrayList<AttendCheck> absentList = new ArrayList<AttendCheck>();
+	private ArrayList<AttendCheck> tardyList = new ArrayList<AttendCheck>();
+	private ArrayList<AttendCheck> etcList = new ArrayList<AttendCheck>();
+	private ArrayList<AttendCheck> tempList = new ArrayList<AttendCheck>();
+	private StringBuilder attendsb = new StringBuilder();
+	private StringBuilder absentsb = new StringBuilder();
+	private StringBuilder tardysb = new StringBuilder();
+	private StringBuilder etcsb = new StringBuilder();
+	private ArrayList<JCheckBox> checkBoxList = new ArrayList<JCheckBox>();
+	private ArrayList<SeatBTNLayout> layoutList = new ArrayList<SeatBTNLayout>();
+	private ArrayList<JPanel> layoutPanelList = new ArrayList<JPanel>();
+	private LineBorder lb = new LineBorder(Color.black, 1, true);
+	
 	public MainView() {
 		setTitle("학생관리 프로그램");
-		setBounds(100, 20, (int)w-200, (int)h);
+		setBounds(500, 150, 1626, 1020);
+		setResizable(false);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
-		topPanel = new JPanel();
-		topLabel = new JLabel("CODEHOWS");
-		sidePanel = new JPanel();
-		sidePanel_1 = new JPanel();
-		sidePanel_2 = new JPanel();
-		internalFrame = new JInternalFrame("학생 목록");
-		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		
-		topLabel.setFont(new Font("굴림", Font.BOLD, (int)h/40));
-		sidePanel_1.setLayout(new GridLayout(0, 1, 0, 0));
-		sidePanel_2.setLayout(new GridLayout(0, 1, 0, 0));
-		
-		topPanel.add(topLabel);
-		internalFrame.getContentPane().add(sidePanel_1, BorderLayout.SOUTH);
-		sidePanel.add(internalFrame);
+		JPanel topPanel = new JPanel();
 		getContentPane().add(topPanel, BorderLayout.NORTH);
-		getContentPane().add(sidePanel, BorderLayout.WEST);
-		getContentPane().add(tabbedPane, BorderLayout.CENTER);
 		
+		JLabel topLabel = new JLabel("CODEHOWS");
+		topLabel.setFont(new Font("굴림", Font.BOLD, 50));
+		topPanel.add(topLabel);
+		
+		JPanel sidePanel = new JPanel();
+		getContentPane().add(sidePanel, BorderLayout.WEST);
+		
+		JInternalFrame internalFrame = new JInternalFrame("학생 목록");
+		sidePanel.add(internalFrame);
+		
+		JPanel sidePanel_1 = new JPanel();
+		sidePanel_1.setLayout(new GridLayout(0, 1, 0, 0));
+		internalFrame.getContentPane().add(sidePanel_1, BorderLayout.SOUTH);
+		
+		JPanel sidePanel_2 = new JPanel();
+		sidePanel_2.setLayout(new GridLayout(0, 1, 0, 0));
 		showStudentList(internalFrame, sidePanel_2);
 		
-		student_insert_Button = new JButton("학생 추가");
+		JButton student_insert_Button = new JButton("학생 추가");
+		student_insert_Button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Student student = new Student();
+				student.setName(JOptionPane.showInputDialog("이름을 입력하세요"));
+				try {
+					java.util.Date d = new java.text.SimpleDateFormat("yyyyMMdd")
+							.parse(JOptionPane.showInputDialog("생년월일을 입력하세요(8자리)"));
+					student.setBirth(new java.sql.Date(d.getTime()));
+				}catch (ParseException pe) {
+					pe.printStackTrace();
+				}
+				student.setGender(JOptionPane.showInputDialog("성별을 입력하세요(남/여)"));
+				student.setPhoneNumber(JOptionPane.showInputDialog("연락처를 입력하세요"));
+				student.setEmail(JOptionPane.showInputDialog("이메일를 입력하세요"));
+				
+				StudentDB sdb = new StudentDB();
+				sdb.insertStudent(student);
+				
+				internalFrame.setVisible(false);
+				JCheckBox chckbxNewCheckBox = new JCheckBox(student.getName());
+				chckbxNewCheckBox.addItemListener(new ItemListener() {
+					@Override
+					public void itemStateChanged(ItemEvent e) {
+						if(chckbxNewCheckBox.isSelected()) {
+							StudentDB sdb = new StudentDB();
+							AttendCheck ac = new AttendCheck();
+							ac = sdb.selectStudentByName(chckbxNewCheckBox.getText());
+							chckbxNewCheckBox.setBackground(Color.BLUE);
+							chckbxNewCheckBox.setForeground(Color.WHITE);
+							tempList.add(ac);
+						} else {
+							tempList.removeIf(stud -> stud.getName().equals(chckbxNewCheckBox.getText()));
+							chckbxNewCheckBox.setBackground(new Color(0xf0f0f0));
+							chckbxNewCheckBox.setForeground(Color.BLACK);
+						}
+					}
+				});
+				checkBoxList.add(chckbxNewCheckBox);
+				sidePanel_2.add(chckbxNewCheckBox);
+				internalFrame.setVisible(true);
+			}
+		});
 		student_insert_Button.setBorder(lb);
 		student_insert_Button.setBackground(Color.GRAY);
 		student_insert_Button.setForeground(Color.WHITE);
 		sidePanel_1.add(student_insert_Button);
 		
-		student_update_Button = new JButton("정보 수정");
+		JButton student_update_Button = new JButton("정보 수정");
+		student_update_Button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				tempList.forEach(stud->{
+					infoView = new InfoView(stud, true);
+					infoView.setMainView(mainView);
+				});
+				tempList.clear();
+				checkBoxList.forEach( chbx -> {
+					chbx.setBackground(new Color(0xf0f0f0));
+					chbx.setForeground(Color.BLACK);
+					chbx.setSelected(false);
+				});
+			}
+		});
 		student_update_Button.setBorder(lb);
 		student_update_Button.setBackground(Color.GRAY);
 		student_update_Button.setForeground(Color.WHITE);
 		sidePanel_1.add(student_update_Button);
 		
-		student_delete_Button = new JButton("학생 삭제");
+		JButton student_delete_Button = new JButton("학생 삭제");
+		student_delete_Button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				tempList.forEach(stud->{
+					int confirm = JOptionPane.showConfirmDialog(null, stud.getName() + "을(를) 삭제하시겠습니까?", "confirm",JOptionPane.YES_NO_OPTION);
+					if(confirm==0) {
+						new StudentDB().deleteStudent(stud);
+						internalFrame.setVisible(false);
+						checkBoxList.forEach( chbx -> {
+							if(chbx.getText().equals(stud.getName())) {
+								sidePanel_2.remove(chbx);
+							}
+						});
+						internalFrame.setVisible(true);
+					}
+				});
+				tempList.clear();
+				resetSeatLayout();
+			}
+		});
 		student_delete_Button.setBorder(lb);
 		student_delete_Button.setBackground(Color.GRAY);
 		student_delete_Button.setForeground(Color.WHITE);
 		sidePanel_1.add(student_delete_Button);
 		
-		absentBTN = new JButton("결석 처리");
-		tardyBTN = new JButton("지각 처리");
-		etcBTN = new JButton("기타 처리");
-		reportBTN = new JButton("보고");
-		sidePanel_1.add(absentBTN);
-		sidePanel_1.add(tardyBTN);
-		sidePanel_1.add(etcBTN);
-		sidePanel_1.add(reportBTN);
+		JButton btnNewButton = new JButton("결석 처리");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				checkBoxList.forEach( chbx -> {
+					if(chbx.getBackground()==Color.BLUE) {
+						chbx.setBackground(Color.RED);
+						chbx.setForeground(Color.WHITE);
+					}
+				});
+				tempList.forEach( stud -> {
+					stud.setReason(JOptionPane.showInputDialog(stud.getName() + "의 결석사유를 입력하세요"));
+					absentList.add(stud);
+					});
+				tempList.clear();
+				absentsb = new StringBuilder();
+				if(absentList.size() != 0)
+					absentsb.append(" 결석 " + absentList.size());
+
+			}
+		});
+		sidePanel_1.add(btnNewButton);
 		
+		JButton btnNewButton_1 = new JButton("지각 처리");
+		btnNewButton_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				checkBoxList.forEach( chbx -> {
+					if(chbx.getBackground()==Color.BLUE) {
+						chbx.setBackground(Color.YELLOW);
+						chbx.setForeground(Color.BLACK);
+					}
+				});
+				tempList.forEach( stud -> {
+					stud.setReason(JOptionPane.showInputDialog(stud.getName() + "의 지각사유를 입력하세요"));
+					tardyList.add(stud);
+					});
+				tempList.clear();
+				tardysb = new StringBuilder();
+				if(tardyList.size() != 0)
+					tardysb.append(" 지각 " + tardyList.size());
+			}
+		});
+		sidePanel_1.add(btnNewButton_1);
+		
+		JButton btnNewButton_2 = new JButton("기타 처리");
+		btnNewButton_2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				checkBoxList.forEach( chbx -> {
+					if(chbx.getBackground()==Color.BLUE) {
+						chbx.setBackground(Color.GREEN);
+						chbx.setForeground(Color.BLACK);
+					}
+				});
+				tempList.forEach( stud -> {
+					stud.setReason(JOptionPane.showInputDialog(stud.getName() + "의 기타사유를 입력하세요"));
+					etcList.add(stud);
+					});
+				tempList.clear();
+				etcsb = new StringBuilder();
+				if(etcList.size() != 0)
+					etcsb.append(" 기타 " + etcList.size());
+			}
+		});
+		sidePanel_1.add(btnNewButton_2);
+		
+		JButton btnNewButton_3 = new JButton("보고");
 		attendCheck1();
+		btnNewButton_3.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				btnNewButton.doClick();
+				btnNewButton_1.doClick();
+				btnNewButton_2.doClick();
+				TextPopupForm pop = new TextPopupForm(470, 500);
+				ScrollPane scroll = new ScrollPane();
+				attendCheck2();
+				JTextArea textarea = new JTextArea(attendsb.toString());
+				textarea.setFont(new Font("굴림", Font.BOLD, 30));
+				textarea.setEditable(false);
+				scroll.add(textarea, BorderLayout.CENTER);
+				pop.add(scroll);
+				attendsb.delete(0, attendsb.length());
+				attendCheck1();
+//				checkBoxList.forEach( chbx -> {
+//					chbx.setBackground(new Color(0xf0f0f0));
+//					chbx.setForeground(Color.BLACK);
+//				});
+			}
+		});
+		sidePanel_1.add(btnNewButton_3);
 		
-		seatPannel1 = new JPanel();
-		seatPannel1_1 = new JPanel();
-		seatPannel1_2 = new JPanel();
-		seatPannel1_3 = new JPanel();
-		seatPannel1_4 = new JPanel();
-		seatPannel1_5 = new JPanel();
-		seatPannel1_6 = new JPanel();
-		seatPannel1_7 = new JPanel();
-		seatPannel1_8 = new JPanel();
-		layoutPanelList.add(seatPannel1_1);
-		layoutPanelList.add(seatPannel1_2);
-		layoutPanelList.add(seatPannel1_3);
-		layoutPanelList.add(seatPannel1_4);
-		layoutPanelList.add(seatPannel1_5);
-		layoutPanelList.add(seatPannel1_6);
-		layoutPanelList.add(seatPannel1_7);
-		layoutPanelList.add(seatPannel1_8);
-		seatPannel1.setLayout(new GridLayout(4, 2, (int)w/10, (int)h/30));
-		seatPannel1_1.setLayout(new GridLayout(2, 2, 0, 0));
-		seatPannel1_2.setLayout(new GridLayout(2, 2, 0, 0));
-		seatPannel1_3.setLayout(new GridLayout(2, 2, 0, 0));
-		seatPannel1_4.setLayout(new GridLayout(2, 2, 0, 0));
-		seatPannel1_5.setLayout(new GridLayout(2, 2, 0, 0));
-		seatPannel1_6.setLayout(new GridLayout(2, 2, 0, 0));
-		seatPannel1_7.setLayout(new GridLayout(2, 2, 0, 0));
-		seatPannel1_8.setLayout(new GridLayout(2, 2, 0, 0));
-		seatPannel1.add(seatPannel1_1);
-		seatPannel1.add(seatPannel1_2);
-		seatPannel1.add(seatPannel1_3);
-		seatPannel1.add(seatPannel1_4);
-		seatPannel1.add(seatPannel1_5);
-		seatPannel1.add(seatPannel1_6);
-		seatPannel1.add(seatPannel1_7);
-		seatPannel1.add(seatPannel1_8);
-		tabbedPane.addTab("자리 배치도", null, seatPannel1, null);
+		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		getContentPane().add(tabbedPane, BorderLayout.CENTER);
+		
+		JPanel mainPanel1 = new JPanel();
+		tabbedPane.addTab("자리 배치도", null, mainPanel1, null);
+		mainPanel1.setLayout(new GridLayout(4, 2, 500, 100));
+		
+		JPanel mainPanel1_1 = new JPanel();
+		mainPanel1.add(mainPanel1_1);
+		mainPanel1_1.setLayout(new GridLayout(2, 2, 0, 0));
+		layoutPanelList.add(mainPanel1_1);
+		
+		JPanel mainPanel1_2 = new JPanel();
+		mainPanel1.add(mainPanel1_2);
+		mainPanel1_2.setLayout(new GridLayout(2, 2, 0, 0));
+		layoutPanelList.add(mainPanel1_2);
+		
+		JPanel mainPanel1_3 = new JPanel();
+		mainPanel1.add(mainPanel1_3);
+		mainPanel1_3.setLayout(new GridLayout(2, 2, 0, 0));
+		layoutPanelList.add(mainPanel1_3);
+		
+		JPanel mainPanel1_4 = new JPanel();
+		mainPanel1.add(mainPanel1_4);
+		mainPanel1_4.setLayout(new GridLayout(2, 2, 0, 0));
+		layoutPanelList.add(mainPanel1_4);
+		
+		JPanel mainPanel1_5 = new JPanel();
+		mainPanel1.add(mainPanel1_5);
+		mainPanel1_5.setLayout(new GridLayout(2, 2, 0, 0));
+		layoutPanelList.add(mainPanel1_5);
+		
+		JPanel mainPanel1_6 = new JPanel();
+		mainPanel1.add(mainPanel1_6);
+		mainPanel1_6.setLayout(new GridLayout(2, 2, 0, 0));
+		layoutPanelList.add(mainPanel1_6);
+		
+		JPanel mainPanel1_7 = new JPanel();
+		mainPanel1.add(mainPanel1_7);
+		mainPanel1_7.setLayout(new GridLayout(2, 2, 0, 0));
+		layoutPanelList.add(mainPanel1_7);
+		
+		JPanel mainPanel1_8 = new JPanel();
+		mainPanel1.add(mainPanel1_8);
+		mainPanel1_8.setLayout(new GridLayout(2, 2, 0, 0));
+		layoutPanelList.add(mainPanel1_8);
+		
 		for(int i=0; i<8; i++) {
 			for(int j=1; j<=4; j++) {
 				layoutPanelList.get(i).add(setStudentSeats(j+i*4));
 			}
 		}
 		
-		panel_4 = new JPanel();
+		JPanel panel_4 = new JPanel();
 		tabbedPane.addTab("미정", null, panel_4, null);
 		setVisible(true);
 	}
 	
-	public void AddListener_StudentInsertBTN(ActionListener listener) {
-		student_insert_Button.addActionListener(listener);
-	}
-	
-	public void AddListener_StudentUpdateBTN(ActionListener listener) {
-		student_update_Button.addActionListener(listener);
-	}
-	
-	public void AddListener_StudentDeleteBTN(ActionListener listener) {
-		student_delete_Button.addActionListener(listener);
-	}
-	
-	public void AddListener_absentBTN(ActionListener listener) {
-		absentBTN.addActionListener(listener);
-	}
-	
-	public void AddListener_tardyBTN(ActionListener listener) {
-		tardyBTN.addActionListener(listener);
-	}
-	
-	public void AddListener_etcBTN(ActionListener listener) {
-		etcBTN.addActionListener(listener);
-	}
-	
-	public void AddListener_reportBTN(ActionListener listener) {
-		reportBTN.addActionListener(listener);
-	}
-	
 	public void resetSeatLayout() {
 		layoutList.forEach(seat->{
-			String name = StudentDAO.getInstance().selectStudentBySeat(seat.getSeatNumber()).getName();
+			String name = new StudentDB().selectStudentBySeat(seat.getSeatNumber()).getName();
 			if(name==null) {
 				seat.getBtn().setText("공석");
 				seat.getBtn().setForeground(new Color(192, 192, 192));
@@ -228,7 +336,7 @@ public class MainView extends JFrame {
 	}
 	
 	public void resetStudentList() {
-		ArrayList<StudentDTO> studs = StudentDAO.getInstance().selectStudents();
+		ArrayList<Student> studs = new StudentDB().selectStudents();
 		checkBoxList.forEach(chbx->{
 			chbx.setText(null);
 		});
@@ -239,14 +347,15 @@ public class MainView extends JFrame {
 	
 	private void showStudentList(JInternalFrame inter, JPanel pane) {
 		inter.getContentPane().add(pane, BorderLayout.NORTH);
-		StudentDAO.getInstance().selectStudents().forEach(std -> {
+		new StudentDB().selectStudents().forEach(std -> {
 			JCheckBox chckbxNewCheckBox = new JCheckBox(std.getName());
-			chckbxNewCheckBox.setFont(new Font("굴림", Font.BOLD, (int)h/80));
 			chckbxNewCheckBox.addItemListener(new ItemListener() {
 				@Override
 				public void itemStateChanged(ItemEvent e) {
 					if(chckbxNewCheckBox.isSelected()) {
-						AttendCheck ac = new AttendCheck(StudentDAO.getInstance().selectStudentByName(chckbxNewCheckBox.getText()), "");
+						StudentDB sdb = new StudentDB();
+						AttendCheck ac = new AttendCheck();
+						ac = sdb.selectStudentByName(chckbxNewCheckBox.getText());
 						chckbxNewCheckBox.setBackground(Color.BLUE);
 						chckbxNewCheckBox.setForeground(Color.WHITE);
 						tempList.add(ac);
@@ -267,17 +376,17 @@ public class MainView extends JFrame {
 	}
 	
 	private JButton setStudentSeats(int seatNo) {
-		StudentDAO sdb = StudentDAO.getInstance();
-		StudentDTO std = sdb.selectStudentBySeat(seatNo);
+		StudentDB sdb = new StudentDB();
+		Student std = sdb.selectStudentBySeat(seatNo);
 		String name = std.getName();
 		
 		JButton seat = null;
 		if(name!=null) {
 			seat = new JButton(name);
-			seat.setFont(new Font("굴림", Font.BOLD, (int)h/20));
+			seat.setFont(new Font("굴림", Font.BOLD, 50));
 		} else {
 			seat = new JButton("공석");
-			seat.setFont(new Font("굴림", Font.BOLD, (int)h/20));
+			seat.setFont(new Font("굴림", Font.BOLD, 50));
 			seat.setForeground(new Color(192, 192, 192));
 		}
 		layoutList.add(new SeatBTNLayout(seat, name, seatNo));
@@ -290,21 +399,21 @@ public class MainView extends JFrame {
 						layoutList.forEach(lol ->{
 							if(lol.getBtn().getText().equals(ChangedName)) {
 								lol.getBtn().setText("공석"); 
-								lol.getBtn().setFont(new Font("굴림", Font.BOLD, (int)h/20));
+								lol.getBtn().setFont(new Font("굴림", Font.BOLD, 50));
 								lol.getBtn().setForeground(new Color(192, 192, 192));
 							}
 						});
 						layoutList.forEach(lol ->{
 							if(lol.getBtn() == (JButton)e.getSource()) {
-								StudentDAO.getInstance().updateSeatNumber(ChangedName, lol.getSeatNumber());
+								new StudentDB().updateSeatNumber(ChangedName, lol.getSeatNumber());
 								((JButton)e.getSource()).setText(ChangedName);
-								((JButton)e.getSource()).setFont(new Font("굴림", Font.BOLD, (int)h/20));
+								((JButton)e.getSource()).setFont(new Font("굴림", Font.BOLD, 50));
 								((JButton)e.getSource()).setForeground(new Color(0, 0, 0));
 							}
 						});
 					}
 				} else {
-					StudentDTO stud = StudentDAO.getInstance().selectStudentByName(((JButton)e.getSource()).getText());
+					Student stud = new StudentDB().selectStudentByName(((JButton)e.getSource()).getText());
 					infoView = new InfoView(stud, false);
 				}
 				
@@ -314,7 +423,7 @@ public class MainView extends JFrame {
 		return seat;
 	}
 	
-	public void attendCheck1() {
+	private void attendCheck1() {
 		LocalDate date = LocalDate.now();
 		DayOfWeek dayOfWeek = date.getDayOfWeek();
 		StringTokenizer st = new StringTokenizer(LocalDate.now().toString(), "-");
@@ -326,8 +435,8 @@ public class MainView extends JFrame {
 			.append(" 1차 교육생 출석현황]\n");
 	}
 	
-	public void attendCheck2() {
-		StudentDAO sdb = StudentDAO.getInstance();
+	private void attendCheck2() {
+		StudentDB sdb = new StudentDB();
 		int stdCount = sdb.countStudents();
 		attendCheck1();
 		attendsb.append("출석 " + (stdCount 

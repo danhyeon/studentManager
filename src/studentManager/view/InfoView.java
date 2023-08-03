@@ -11,18 +11,17 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import studentManager.model.StudentDAO;
-import studentManager.model.StudentDTO;
+import studentManager.controller.StudentDB;
+import studentManager.model.Student;
 
 public class InfoView extends JFrame {
-	private static final long serialVersionUID = 8980821934872205508L;
 	MainView mainView;
 	
 	public void setMainView(MainView mainView) {
 		this.mainView = mainView;
 	}
 	
-    public InfoView(StudentDTO std, boolean flag) {
+    public InfoView(Student std, boolean flag) {
         setTitle("학생 정보");
         if(flag) {
         	setSize(280, 250);
@@ -39,7 +38,7 @@ public class InfoView extends JFrame {
         setVisible(true);
     }
    
-    public void placeLoginPanel(JPanel panel, StudentDTO std, boolean flag){
+    public void placeLoginPanel(JPanel panel, Student std, boolean flag){
         panel.setLayout(null);     
         JLabel nameLabel = new JLabel("이름");
         nameLabel.setBounds(10, 10, 80, 25);
@@ -110,9 +109,8 @@ public class InfoView extends JFrame {
 	            public void actionPerformed(ActionEvent e) {
 	            	try {
 	            		java.util.Date d = new java.text.SimpleDateFormat("yyyy-MM-dd").parse(birthText.getText());
-	            		java.sql.Date sd =  new java.sql.Date(d.getTime());
-	            		StudentDTO stud = new StudentDTO(std.getName(), sd, genderText.getText(), mobileText.getText(), emailText.getText());
-	            		StudentDAO.getInstance().updateStudent(stud, nameText.getText());
+	            		new StudentDB().updateStudent(nameText.getText(), new java.sql.Date(d.getTime()),
+	            				genderText.getText(), mobileText.getText(), emailText.getText(), std.getName());
 		            }catch (ParseException pe) {
 						pe.printStackTrace();
 					}
